@@ -5,12 +5,17 @@ function Stone(color, position) {
 
 function Plan(size, fields) {
     this.size = size;
-
     this.fields = fields;
 }
 
-Plan.prototype.getField = function (x, y) {
-    return this.fields[x][y];
+Plan.prototype = {
+
+    constructor: Plan,
+
+    getField: function (x, y) {
+        return this.fields[x][y];
+    },
+
 }
 
 function PlanRenderrer(plan, fieldSize) {
@@ -28,66 +33,73 @@ function PlanRenderrer(plan, fieldSize) {
     this.render();
 }
 
-PlanRenderrer.prototype.render = function () {
+PlanRenderrer.prototype = {
 
-    var context = this.context;
-    var fieldSize = this.fieldSize;
-    for (var x = 0; x < this.plan.size; x++) {
+    constructor: PlanRenderrer,
 
-        for (var y = 0; y < this.plan.size; y++) {
+    render: function () {
 
-            var planEnd = this.plan.size - 1;
-            var center = (this.plan.size - 1) / 2;
+        var context = this.context;
+        var fieldSize = this.fieldSize;
+        for (var x = 0; x < this.plan.size; x++) {
 
-            if (x == 0 && y == 0 // top-left corner
-                || x == 0 && y == planEnd // bottom-left corner
-                || x == planEnd && y == 0 // top-right corner
-                || x == planEnd && y == planEnd // bottom-right corner
-                || x == center && y == center // center
-            ) {
-                context.fillStyle = 'black';
-            } else {
-                context.fillStyle = 'gray';
+            for (var y = 0; y < this.plan.size; y++) {
+
+                var planEnd = this.plan.size - 1;
+                var center = (this.plan.size - 1) / 2;
+
+                if (x == 0 && y == 0 // top-left corner
+                    || x == 0 && y == planEnd // bottom-left corner
+                    || x == planEnd && y == 0 // top-right corner
+                    || x == planEnd && y == planEnd // bottom-right corner
+                    || x == center && y == center // center
+                ) {
+                    context.fillStyle = 'black';
+                } else {
+                    context.fillStyle = 'gray';
+                }
+                context.fillRect(x * fieldSize, y * fieldSize, fieldSize, fieldSize);
+                context.strokeRect(x * fieldSize, y * fieldSize, fieldSize, fieldSize);
+                this.renderStone(x, y);
+
             }
-            context.fillRect(x * fieldSize, y * fieldSize, fieldSize, fieldSize);
-            context.strokeRect(x * fieldSize, y * fieldSize, fieldSize, fieldSize);
-            this.renderStone(x, y);
-
         }
-    }
-}
+    },
 
-PlanRenderrer.prototype.renderStone = function (x, y) {
 
-    var context = this.context;
-    var stone = this.plan.getField(x, y);
-    var fieldSize = this.fieldSize;
+    renderStone: function (x, y) {
 
-    if(stone == '.') {
-        return;
-    }
+        var context = this.context;
+        var stone = this.plan.getField(x, y);
+        var fieldSize = this.fieldSize;
 
-    stoneX = x * fieldSize + fieldSize / 2;
-    stoneY = y * fieldSize + fieldSize / 2;
-    context.beginPath();
-    context.arc(stoneX, stoneY, 0.3 * fieldSize, 0, 2 * Math.PI);
-    context.closePath();
-    context.stroke();
+        if (stone == '.') {
+            return;
+        }
 
-    if (stone == 'W' || stone == 'K') {
-        context.fillStyle = 'white';
-    } else {
-        context.fillStyle = 'black';
-    }
-    context.fill()
-
-    if(stone == 'K') {
+        stoneX = x * fieldSize + fieldSize / 2;
+        stoneY = y * fieldSize + fieldSize / 2;
         context.beginPath();
-        context.arc(stoneX, stoneY, 0.1*fieldSize, 0, 2 * Math.PI);
+        context.arc(stoneX, stoneY, 0.3 * fieldSize, 0, 2 * Math.PI);
         context.closePath();
         context.stroke();
-        context.fillStyle = 'gold';
-        context.fill();
+
+        if (stone == 'W' || stone == 'K') {
+            context.fillStyle = 'white';
+        } else {
+            context.fillStyle = 'black';
+        }
+        context.fill()
+
+        if (stone == 'K') {
+            context.beginPath();
+            context.arc(stoneX, stoneY, 0.1 * fieldSize, 0, 2 * Math.PI);
+            context.closePath();
+            context.stroke();
+            context.fillStyle = 'gold';
+            context.fill();
+        }
+
     }
 
 }
