@@ -18,8 +18,54 @@ Plan.prototype = {
         return this.fields[x][y];
     },
 
-    selectStone: function (x, y) {
-        this.selectedStone = [x, y];
+    isFieldEmpty: function (x, y) {
+        return this.fields[x][y] == '.';
+    },
+
+    /**
+     * Stones can move as towers in chess
+     * @param int fromX
+     * @param int fromY
+     * @param int toX
+     * @param int toY
+     * @returns {boolean}
+     */
+    canPerformStep: function (fromX, fromY, toX, toY) {
+
+        if (fromX == toX) {
+            var min = fromY < toY ? fromY + 1 : toY;
+            var max = fromY > toY ? fromY - 1 : toY;
+            for (var y = min; y <= max; y++) {
+                if (!this.isFieldEmpty(toX, y)) {
+                    return false;
+                }
+            }
+        } else if (fromY == toY) {
+            var min = fromX < toX ? fromX + 1 : toX;
+            var max = fromX > toX ? fromX - 1 : toX;
+            for (var x = min; x <= max; x++) {
+                if (!this.isFieldEmpty(x, toY)) {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+        return true;
+    },
+
+    clickedOnField: function (x, y) {
+        var stone = this.selectedStone;
+        if (stone) {
+            if (this.canPerformStep(stone[0], stone[1], x, y)) { //
+                var color = this.fields[stone[0]][stone[1]];
+                this.fields[stone[0]][stone[1]] = '.';
+                this.fields[x][y] = color;
+                this.selectedStone = null;
+            }
+        } else {
+            this.selectedStone = [x, y];
+        }
     },
 
 }
@@ -83,7 +129,7 @@ PlanRenderrer.prototype = {
     click: function (x, y) {
         var fieldX = Math.floor(x / this.fieldSize);
         var fieldY = Math.floor(y / this.fieldSize);
-        this.plan.selectStone(fieldX, fieldY);
+        this.plan.clickedOnField(fieldX, fieldY);
     },
 
     renderStone: function (x, y) {
@@ -110,7 +156,7 @@ PlanRenderrer.prototype = {
         }
 
         var selected = this.plan.selectedStone;
-        if(selected && selected[0] == x && selected[1] == y) {
+        if (selected && selected[0] == x && selected[1] == y) {
             context.strokeStyle = '#3498db';
             var lineWidth = context.lineWidth;
             context.lineWidth = 3;
@@ -156,7 +202,7 @@ window.onload = function () {
 
     var renderrer = new PlanRenderrer(plan, 31);
 
-    setInterval(function() {
+    setInterval(function () {
         renderrer.render();
     }, Math.floor(1000 / 60)); // 60 FPS :D
 }
