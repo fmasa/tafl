@@ -26,6 +26,22 @@ Plan.prototype = {
         return this.fields[x][y] == '.';
     },
 
+    isSpecialField: function (x, y) {
+        var planEnd = this.size - 1;
+        var center = (this.size - 1) / 2;
+
+        if (x == 0 && y == 0 // top-left corner
+            || x == 0 && y == planEnd // bottom-left corner
+            || x == planEnd && y == 0 // top-right corner
+            || x == planEnd && y == planEnd // bottom-right corner
+            || x == center && y == center // center
+        ) {
+            return true;
+        }
+
+        return false;
+    },
+
     /**
      * Stones can move as towers in chess
      * @param int fromX
@@ -34,9 +50,12 @@ Plan.prototype = {
      * @param int toY
      * @returns {boolean}
      */
-    canPerformStep: function (fromX, fromY, toX, toY) {
+    canPerformStep: function (fromX, fromY, toX, toY, isKing) {
 
-        if (fromX == toX) {
+
+        if (this.isSpecialField(toX, toY) && !isKing) {
+            return false
+        } else if (fromX == toX) {
             var min = fromY < toY ? fromY + 1 : toY;
             var max = fromY > toY ? fromY - 1 : toY;
             for (var y = min; y <= max; y++) {
@@ -81,7 +100,7 @@ Plan.prototype = {
     clickedOnField: function (x, y) {
         var stone = this.selectedStone;
         if (stone && this.getField(x, y) != this.getField(stone[0], stone[1])) {
-            if (this.canPerformStep(stone[0], stone[1], x, y)) { //
+            if (this.canPerformStep(stone[0], stone[1], x, y, this.getField(stone[0], stone[1]) == 'K')) { //
                 var color = this.fields[stone[0]][stone[1]];
                 this.fields[stone[0]][stone[1]] = '.';
                 this.fields[x][y] = color;
@@ -90,7 +109,8 @@ Plan.prototype = {
                 this.onTurn = this.onTurn == 'B' ? 'W' : 'B';
             }
         } else {
-            if (this.getField(x, y) == this.onTurn) {
+            var field = this.getField(x, y)
+            if ((field == 'K' ? 'W' : field) == this.onTurn) {
                 this.selectedStone = [x, y];
             }
         }
@@ -133,15 +153,7 @@ PlanRenderrer.prototype = {
 
             for (var y = 0; y < this.plan.size; y++) {
 
-                var planEnd = this.plan.size - 1;
-                var center = (this.plan.size - 1) / 2;
-
-                if (x == 0 && y == 0 // top-left corner
-                    || x == 0 && y == planEnd // bottom-left corner
-                    || x == planEnd && y == 0 // top-right corner
-                    || x == planEnd && y == planEnd // bottom-right corner
-                    || x == center && y == center // center
-                ) {
+                if (this.plan.isSpecialField(x, y)) {
                     context.fillStyle = 'black';
                 } else {
                     context.fillStyle = 'gray';
