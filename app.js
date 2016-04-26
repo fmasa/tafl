@@ -78,7 +78,7 @@ Plan.prototype = {
     },
 
     checkKills: function (x, y) {
-        var attacker = this.getField(x, y);
+        var attacker = this.getField(x, y, true);
         var defender = attacker == 'B' ? 'W' : 'B';
 
         var checks = [
@@ -91,7 +91,7 @@ Plan.prototype = {
 
         for (var i = 0; i < 4; i++) {
             var check = checks[i];
-            if (this.getField(check[0], check[1]) == defender && this.getField(check[2], check[3]) == attacker) {
+            if (this.getField(check[0], check[1]) == defender && this.getField(check[2], check[3], true) == attacker) {
                 this.fields[check[0]][check[1]] = '.';
             }
         }
