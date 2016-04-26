@@ -15,11 +15,11 @@ Plan.prototype = {
 
     selectedStone: null,
 
-    getField: function (x, y) {
+    getField: function (x, y, getColor) {
         if (!this.fields[x] || !this.fields[x][y]) {
             return null;
         }
-        return this.fields[x][y];
+        return getColor && this.fields[x][y] == 'K' ? 'W' : this.fields[x][y];
     },
 
     isFieldEmpty: function (x, y) {
@@ -99,8 +99,9 @@ Plan.prototype = {
 
     clickedOnField: function (x, y) {
         var stone = this.selectedStone;
-        if (stone && this.getField(x, y) != this.getField(stone[0], stone[1])) {
-            if (this.canPerformStep(stone[0], stone[1], x, y, this.getField(stone[0], stone[1]) == 'K')) { //
+        var field = this.getField(x, y, true);
+        if (stone && field != this.getField(stone[0], stone[1], true)) {
+            if (this.canPerformStep(stone[0], stone[1], x, y, this.getField(stone[0], stone[1]) == 'K')) {
                 var color = this.fields[stone[0]][stone[1]];
                 this.fields[stone[0]][stone[1]] = '.';
                 this.fields[x][y] = color;
@@ -108,11 +109,8 @@ Plan.prototype = {
                 this.checkKills(x, y);
                 this.onTurn = this.onTurn == 'B' ? 'W' : 'B';
             }
-        } else {
-            var field = this.getField(x, y)
-            if ((field == 'K' ? 'W' : field) == this.onTurn) {
-                this.selectedStone = [x, y];
-            }
+        } else if (field == this.onTurn) {
+            this.selectedStone = [x, y];
         }
     },
 
