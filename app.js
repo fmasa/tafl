@@ -50,6 +50,7 @@ PlanRenderrer.prototype.render = function () {
                 context.fillStyle = 'gray';
             }
             context.fillRect(x * this.fieldSize, y * this.fieldSize, this.fieldSize, this.fieldSize); // Draw the field
+            context.strokeRect(x * this.fieldSize, y * this.fieldSize, this.fieldSize, this.fieldSize);
             this.renderStone(x, y);
 
         }
