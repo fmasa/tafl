@@ -12,8 +12,14 @@ Plan.prototype = {
 
     constructor: Plan,
 
+    selectedStone: null,
+
     getField: function (x, y) {
         return this.fields[x][y];
+    },
+
+    selectStone: function (x, y) {
+        this.selectedStone = [x, y];
     },
 
 }
@@ -26,6 +32,14 @@ function PlanRenderrer(plan, fieldSize) {
     this.canvas = document.createElement('canvas');
     this.canvas.width = plan.size * fieldSize;
     this.canvas.height = plan.size * fieldSize;
+
+    var that = this;
+    this.canvas.addEventListener('click', function (event) {
+        var x = event.pageX - that.canvas.offsetLeft;
+        var y = event.pageY - that.canvas.offsetTop;
+        that.click(x, y)
+    }, false);
+
     document.body.appendChild(this.canvas);
 
     this.context = this.canvas.getContext('2d');
@@ -66,6 +80,11 @@ PlanRenderrer.prototype = {
         }
     },
 
+    click: function (x, y) {
+        var fieldX = Math.floor(x / this.fieldSize);
+        var fieldY = Math.floor(y / this.fieldSize);
+        this.plan.selectStone(fieldX, fieldY);
+    },
 
     renderStone: function (x, y) {
 
@@ -89,6 +108,19 @@ PlanRenderrer.prototype = {
         } else {
             context.fillStyle = 'black';
         }
+
+        var selected = this.plan.selectedStone;
+        if(selected && selected[0] == x && selected[1] == y) {
+            context.strokeStyle = '#3498db';
+            var lineWidth = context.lineWidth;
+            context.lineWidth = 3;
+
+            context.stroke();
+
+            context.lineWidth = lineWidth;
+            context.strokeStyle = 'black';
+        }
+
         context.fill()
 
         if (stone == 'K') {
@@ -123,4 +155,8 @@ window.onload = function () {
     var plan = new Plan(11, stones);
 
     var renderrer = new PlanRenderrer(plan, 31);
+
+    setInterval(function() {
+        renderrer.render();
+    }, Math.floor(1000 / 60)); // 60 FPS :D
 }
