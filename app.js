@@ -7,6 +7,22 @@ function Plan(size, fields, onTurn) {
     this.size = size;
     this.fields = fields;
     this.onTurn = onTurn;
+
+    var kingFound = false;
+    for (var x = 0; x < size; x++) {
+        for (var y = 0; y < size; y++) {
+            if (fields[x][y] == 'K') {
+                if(kingFound) {
+                    console.error('There are multiple kings on the plan!');
+                }
+                this.kingsLocation = [x, y];
+                kingFound = true;
+            }
+        }
+    }
+    if (!kingFound) {
+        console.error('There is no king on the plan!');
+    }
 }
 
 Plan.prototype = {
@@ -14,6 +30,8 @@ Plan.prototype = {
     constructor: Plan,
 
     selectedStone: null,
+
+    kingsLocation: null,
 
     getField: function (x, y, getColor) {
         if (!this.fields[x] || !this.fields[x][y]) {
@@ -26,7 +44,7 @@ Plan.prototype = {
         return this.fields[x][y] == '.';
     },
 
-    isSpecialField: function (x, y) {
+    isSpecialField: function (x, y, excludeCenter) {
         var planEnd = this.size - 1;
         var center = (this.size - 1) / 2;
 
@@ -34,7 +52,7 @@ Plan.prototype = {
             || x == 0 && y == planEnd // bottom-left corner
             || x == planEnd && y == 0 // top-right corner
             || x == planEnd && y == planEnd // bottom-right corner
-            || x == center && y == center // center
+            || x == center && y == center && !excludeCenter // center
         ) {
             return true;
         }
@@ -97,22 +115,54 @@ Plan.prototype = {
         }
     },
 
+    checkKing: function () {
+        var x = this.kingsLocation[0];
+        var y = this.kingsLocation[1];
+
+        if (this.isSpecialField(x, y, true)) { // King is on throne!
+            alert('White won!');
+            this.onTurn = null;
+            return;
+        }
+
+        var checks = [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]];
+        for(var i = 0; i < 4; i++) {
+            var field = this.getField(checks[i][0],checks[i][1]);
+            if(!this.isSpecialField(checks[i][0], checks[i][1], true) && field && field != 'B') {
+                return;
+            }
+
+        }
+        alert('Black won!');
+        this.onTurn = null;
+    },
+
     clickedOnField: function (x, y) {
         var stone = this.selectedStone;
         var field = this.getField(x, y, true);
         if (stone && field != this.getField(stone[0], stone[1], true)) {
             if (this.canPerformStep(stone[0], stone[1], x, y, this.getField(stone[0], stone[1]) == 'K')) {
-                var color = this.fields[stone[0]][stone[1]];
+                var color = this.getField(stone[0], stone[1]);
                 this.fields[stone[0]][stone[1]] = '.';
                 this.fields[x][y] = color;
+
+                if (color == 'K') { // Update king's location
+                    this.kingsLocation = [x, y];
+                }
+
                 this.selectedStone = null;
                 this.checkKills(x, y);
-                this.onTurn = this.onTurn == 'B' ? 'W' : 'B';
+                this.checkKing();
+                if (this.onTurn) {
+                    this.onTurn = this.onTurn == 'B' ? 'W' : 'B';
+                }
+
             }
         } else if (field == this.onTurn) {
             this.selectedStone = [x, y];
         }
-    },
+    }
+    ,
 
 }
 
