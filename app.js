@@ -3,9 +3,10 @@ function Stone(color, position) {
     this.position = position;
 }
 
-function Plan(size, fields) {
+function Plan(size, fields, onTurn) {
     this.size = size;
     this.fields = fields;
+    this.onTurn = onTurn;
 }
 
 Plan.prototype = {
@@ -56,15 +57,18 @@ Plan.prototype = {
 
     clickedOnField: function (x, y) {
         var stone = this.selectedStone;
-        if (stone) {
+        if (stone && this.getField(x, y) != this.getField(stone[0], stone[1])) {
             if (this.canPerformStep(stone[0], stone[1], x, y)) { //
                 var color = this.fields[stone[0]][stone[1]];
                 this.fields[stone[0]][stone[1]] = '.';
                 this.fields[x][y] = color;
                 this.selectedStone = null;
+                this.onTurn = this.onTurn == 'B' ? 'W' : 'B';
             }
         } else {
-            this.selectedStone = [x, y];
+            if (this.getField(x, y) == this.onTurn) {
+                this.selectedStone = [x, y];
+            }
         }
     },
 
@@ -198,7 +202,7 @@ window.onload = function () {
         ['.', '.', '.', 'B', 'B', 'B', 'B', 'B', '.', '.', '.'],
     ];
 
-    var plan = new Plan(11, stones);
+    var plan = new Plan(11, stones, 'B');
 
     var renderrer = new PlanRenderrer(plan, 31);
 
