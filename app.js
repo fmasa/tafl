@@ -16,6 +16,9 @@ Plan.prototype = {
     selectedStone: null,
 
     getField: function (x, y) {
+        if (!this.fields[x] || !this.fields[x][y]) {
+            return null;
+        }
         return this.fields[x][y];
     },
 
@@ -55,6 +58,26 @@ Plan.prototype = {
         return true;
     },
 
+    checkKills: function (x, y) {
+        var attacker = this.getField(x, y);
+        var defender = attacker == 'B' ? 'W' : 'B';
+
+        var checks = [
+            // defenderX, defenderY, attackerX, attackerY
+            [x + 1, y, x + 2, y], // Defender on the right
+            [x - 1, y, x - 2, y], // Defender on the left
+            [x, y + 1, x, y + 2], // Defender below
+            [x, y - 1, x, y - 2], // Defendeer above
+        ];
+
+        for (var i = 0; i < 4; i++) {
+            var check = checks[i];
+            if (this.getField(check[0], check[1]) == defender && this.getField(check[2], check[3]) == attacker) {
+                this.fields[check[0]][check[1]] = '.';
+            }
+        }
+    },
+
     clickedOnField: function (x, y) {
         var stone = this.selectedStone;
         if (stone && this.getField(x, y) != this.getField(stone[0], stone[1])) {
@@ -63,6 +86,7 @@ Plan.prototype = {
                 this.fields[stone[0]][stone[1]] = '.';
                 this.fields[x][y] = color;
                 this.selectedStone = null;
+                this.checkKills(x, y);
                 this.onTurn = this.onTurn == 'B' ? 'W' : 'B';
             }
         } else {
