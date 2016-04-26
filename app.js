@@ -31,7 +31,7 @@ function PlanRenderrer(plan, fieldSize) {
 PlanRenderrer.prototype.render = function () {
 
     var context = this.context;
-
+    var fieldSize = this.fieldSize;
     for (var x = 0; x < this.plan.size; x++) {
 
         for (var y = 0; y < this.plan.size; y++) {
@@ -49,8 +49,8 @@ PlanRenderrer.prototype.render = function () {
             } else {
                 context.fillStyle = 'gray';
             }
-            context.fillRect(x * this.fieldSize, y * this.fieldSize, this.fieldSize, this.fieldSize); // Draw the field
-            context.strokeRect(x * this.fieldSize, y * this.fieldSize, this.fieldSize, this.fieldSize);
+            context.fillRect(x * fieldSize, y * fieldSize, fieldSize, fieldSize);
+            context.strokeRect(x * fieldSize, y * fieldSize, fieldSize, fieldSize);
             this.renderStone(x, y);
 
         }
